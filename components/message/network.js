@@ -3,8 +3,12 @@ const router = express.Router();
 const response = require('../../network/response');
 const controller = require('./controller');
 
+// ejem query
+// http://localhost:3000/message?user=Carlos
 router.get('/', function(req,res){
-    controller.getMessage()
+    //se optiene el usuario a buscar, sino esta será null
+    const filterMessages = req.query.user || null; 
+    controller.getMessage(filterMessages)
         .then((MessageList) => {
             response.success(req, res, MessageList, 200);
         })
@@ -44,15 +48,29 @@ router.post('/', function(req,res){
     //response.success(req, res, 'Creado correctamente', 201);
 });
 
-router.delete('/', function(req,res){  
+router.patch('/:id', function(req, res) {
 
-    //res.send({error: '', body: 'borrado correctamente'});
-    if (req.query.error == "ok"){
-        response.error(req, res, 'Error simulado', 400, 'simulación de error con details')
-    }
-    else{
-        response.success(req, res, 'Borrado correctamente', 201)
-    }
+    //req.params.id permite obtener el id de la petición
+    //req.body.message permite obtener el mensaje que nos envian
+    //como lo que nos devulve es una promesa, utilizamos then y catch 
+    controller.updateMessage(req.params.id, req.body.message)
+        .then((data) => {
+            response.success(req, res, data, 200);
+        })
+        .catch(e => {
+            response.error(req, res, 'Error interno', 500, e);
+        });
+
+})
+
+router.delete('/:id', function(req,res){  
+    controller.deleteMessage(req.params.id)
+        .then(() => {
+            response.success(req, res, `Mensaje ${req.params.id} eliminado`, 200);
+        })
+        .catch(e =>{
+            response.error(req, res, 'Error interno', 500, e); 
+        })
 });
 //  '/' significa que accedo desde cualquier ruta
 // request, response --> parametros que tiene cualquier función http

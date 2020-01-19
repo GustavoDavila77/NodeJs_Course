@@ -7,12 +7,15 @@
 const express = require('express');
 //body-parser es un modulo, que permite trabajar con el body de la petición
 const bodyParser = require('body-parser');
+
+const db = require('./db');
 //el router nos permite separar cabeceras, metodos, url ,etc --> separar peticiones
 const router = require('./network/routes');
 // este es el router antiguo
 //const router = require('./components/message/network');
 
-
+//enviamos la url a db para que conecte con Mongodb Atlas
+db('mongodb+srv://atlas-admin:admintavo@atlastar-vkqae.mongodb.net/Telegrom?retryWrites=true&w=majority');
 
 //se inicializa la app express
 var app = express();
