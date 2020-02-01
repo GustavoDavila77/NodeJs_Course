@@ -1,16 +1,26 @@
 const store = require('./store');
+const path = require('path');
 
-function addMessage(user, message){
+function addMessage(chat, user, message, file){
     return new Promise((resolve, reject) =>{
-        if (!user || !message) {
+        if (!chat || !user || !message) {
             console.error('[messageController] No hay usuario o mensaje');
             reject('Los datos son incorrectos');
             return false; 
         }
+        let fileUrl = '';
+        if(file) {
+            //este link nos permite descargar el archivo, una vez este en el server
+            fileUrl = 'http://localhost:3000/app/files/' +  file.filename;//en app es donde se sirven los archivos estaticos
+        }
+
         const fullMessage = {
+            chat: chat,
             user: user,
             message: message,
-            date: new Date()
+            date: new Date(),
+            file: fileUrl,
+
         };
 
         //console.log(fullMessage);
@@ -19,9 +29,9 @@ function addMessage(user, message){
     })    
 }
 
-function getMessage(filterUser) {
+function getMessage(filterChat) {
     return new Promise((resolve, reject) => {
-        resolve(store.list(filterUser)); 
+        resolve(store.list(filterChat)); 
     })
 }
 

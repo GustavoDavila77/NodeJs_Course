@@ -1,13 +1,35 @@
 const express = require('express');
+const path = require('path');
+const multer = require('multer'); //permite gestionar la transmisión de archivos, gestión de tipos, guardar archivos en disco
 const router = express.Router();
 const response = require('../../network/response');
 const controller = require('./controller');
+
+/* intento fallido de guardar imagen con identificador unico y nombre original
+let storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'public/files')
+    },
+    filename: (req, file, cb) => {
+        console.log('antes filename');
+        cb(null, file.filename + path.extname(file.originalname));
+        console.log('despues filename');
+    }
+});
+
+const upload = multer({storage: storage}); */
+
+// los archivos que se carguen van a la carpeta public, donde se sirven los estaticos, para poder acceder a ellos 
+//se crea una instancia de multer
+const upload = multer({
+    dest: 'public/files',
+}); 
 
 // ejem query
 // http://localhost:3000/message?user=Carlos
 router.get('/', function(req,res){
     //se optiene el usuario a buscar, sino esta será null
-    const filterMessages = req.query.user || null; 
+    const filterMessages = req.query.chat || null; 
     controller.getMessage(filterMessages)
         .then((MessageList) => {
             response.success(req, res, MessageList, 200);
@@ -24,9 +46,16 @@ router.get('/', function(req,res){
     response.success(req, res, 'solicitud aprobada', 200);*/
 });
 
-router.post('/', function(req,res){
 
-    controller.addMessage(req.body.user, req.body.message)
+//upload.single('file') es un middleware, el cual es un punto 
+//por donde se va a pasar antes de entrar a nuestra función
+//como sabe multer de donde sacar el archivo?
+//para eso se especifica upload.single('nombre_archivo_en_multipart_insomnia')
+router.post('/', upload.single('file'), function(req,res){
+
+    //console.log(req.file); info de la imagen 
+
+    controller.addMessage(req.body.chat, req.body.user, req.body.message, req.file)
         .then((fullMessage) =>{
             response.success(req, res, fullMessage, 201);
         })
